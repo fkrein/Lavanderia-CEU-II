@@ -1,4 +1,4 @@
-package com.google.firebase.example.fireeats.adapter;
+package com.ceu.lavanderia.adapter;
 
 import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
@@ -9,9 +9,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.example.fireeats.R;
-import com.google.firebase.example.fireeats.model.Restaurant;
-import com.google.firebase.example.fireeats.util.RestaurantUtil;
+import com.ceu.lavanderia.R;
+import com.ceu.lavanderia.model.Restaurant;
+import com.ceu.lavanderia.util.RestaurantUtil;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 

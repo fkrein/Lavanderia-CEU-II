@@ -1,9 +1,9 @@
-package com.google.firebase.example.fireeats.util;
+package com.ceu.lavanderia.util;
 
 import android.content.Context;
 
-import com.google.firebase.example.fireeats.R;
-import com.google.firebase.example.fireeats.model.Restaurant;
+import com.ceu.lavanderia.R;
+import com.ceu.lavanderia.model.Restaurant;
 
 import java.util.Arrays;
 import java.util.Locale;

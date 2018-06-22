@@ -1,4 +1,4 @@
-package com.google.firebase.example.fireeats;
+package com.ceu.lavanderia;
 
 import android.content.Intent;
 import android.support.test.rule.ActivityTestRule;
@@ -81,7 +81,7 @@ import static android.support.test.espresso.Espresso.openActionBarOverflowOrOpti
   }
 
   private UiSelector getIdSelector(String id) {
-    return new UiSelector().resourceId("com.google.firebase.example.fireeats:id/" + id);
+    return new UiSelector().resourceId("com.ceu.lavanderia:id/" + id);
   }
 
   private void closeKeyboard() {

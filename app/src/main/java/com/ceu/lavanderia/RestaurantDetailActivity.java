@@ -1,4 +1,4 @@
-package com.google.firebase.example.fireeats;
+package com.ceu.lavanderia;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -18,10 +18,10 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.example.fireeats.adapter.RatingAdapter;
-import com.google.firebase.example.fireeats.model.Rating;
-import com.google.firebase.example.fireeats.model.Restaurant;
-import com.google.firebase.example.fireeats.util.RestaurantUtil;
+import com.ceu.lavanderia.adapter.RatingAdapter;
+import com.ceu.lavanderia.model.Rating;
+import com.ceu.lavanderia.model.Restaurant;
+import com.ceu.lavanderia.util.RestaurantUtil;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;

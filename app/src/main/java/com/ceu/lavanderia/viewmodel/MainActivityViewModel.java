@@ -1,11 +1,11 @@
-package com.google.firebase.example.fireeats.viewmodel;
+package com.ceu.lavanderia.viewmodel;
 
 import android.arch.lifecycle.ViewModel;
 
-import com.google.firebase.example.fireeats.Filters;
+import com.ceu.lavanderia.Filters;
 
 /**
- * ViewModel for {@link com.google.firebase.example.fireeats.MainActivity}.
+ * ViewModel for {@link com.ceu.lavanderia.MainActivity}.
  */
 
 public class MainActivityViewModel extends ViewModel {

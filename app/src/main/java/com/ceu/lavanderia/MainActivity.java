@@ -1,4 +1,4 @@
-package com.google.firebase.example.fireeats;
+package com.ceu.lavanderia;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
@@ -26,12 +26,12 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.example.fireeats.adapter.RestaurantAdapter;
-import com.google.firebase.example.fireeats.model.Rating;
-import com.google.firebase.example.fireeats.model.Restaurant;
-import com.google.firebase.example.fireeats.util.RatingUtil;
-import com.google.firebase.example.fireeats.util.RestaurantUtil;
-import com.google.firebase.example.fireeats.viewmodel.MainActivityViewModel;
+import com.ceu.lavanderia.adapter.RestaurantAdapter;
+import com.ceu.lavanderia.model.Rating;
+import com.ceu.lavanderia.model.Restaurant;
+import com.ceu.lavanderia.util.RatingUtil;
+import com.ceu.lavanderia.util.RestaurantUtil;
+import com.ceu.lavanderia.viewmodel.MainActivityViewModel;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -39,6 +39,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.WriteBatch;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -266,8 +267,11 @@ public class MainActivity extends AppCompatActivity implements
     private void startSignIn() {
         // Sign in with FirebaseUI
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
-                .setAvailableProviders(Collections.singletonList(
-                        new AuthUI.IdpConfig.EmailBuilder().build()))
+                .setAvailableProviders(Arrays.asList(
+                        new AuthUI.IdpConfig.EmailBuilder().build(),
+                        new AuthUI.IdpConfig.PhoneBuilder().build(),
+                        new AuthUI.IdpConfig.GoogleBuilder().build(),
+                        new AuthUI.IdpConfig.FacebookBuilder().build()))
                 .setIsSmartLockEnabled(false)
                 .build();
 

@@ -1,10 +1,10 @@
-package com.google.firebase.example.fireeats;
+package com.ceu.lavanderia;
 
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.google.firebase.example.fireeats.model.Restaurant;
-import com.google.firebase.example.fireeats.util.RestaurantUtil;
+import com.ceu.lavanderia.model.Restaurant;
+import com.ceu.lavanderia.util.RestaurantUtil;
 import com.google.firebase.firestore.Query;
 
 /**

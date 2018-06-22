@@ -1,4 +1,4 @@
-package com.google.firebase.example.fireeats.model;
+package com.ceu.lavanderia.model;
 
 import com.google.firebase.firestore.IgnoreExtraProperties;
 

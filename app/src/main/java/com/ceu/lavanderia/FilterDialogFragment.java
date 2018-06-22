@@ -1,4 +1,4 @@
-package com.google.firebase.example.fireeats;
+package com.ceu.lavanderia;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Spinner;
 
-import com.google.firebase.example.fireeats.model.Restaurant;
+import com.ceu.lavanderia.model.Restaurant;
 import com.google.firebase.firestore.Query;
 
 import butterknife.BindView;
