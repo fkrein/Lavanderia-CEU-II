@@ -6,32 +6,29 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
+import com.ceu.lavanderia.adapter.AgendamentosAdapter;
+import com.ceu.lavanderia.model.Agendamento;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.ceu.lavanderia.adapter.RestaurantAdapter;
-import com.ceu.lavanderia.model.Rating;
-import com.ceu.lavanderia.model.Restaurant;
-import com.ceu.lavanderia.util.RatingUtil;
-import com.ceu.lavanderia.util.RestaurantUtil;
-import com.ceu.lavanderia.viewmodel.MainActivityViewModel;
+import com.ceu.lavanderia.util.AgendamentoUtil;
+import com.ceu.lavanderia.viewmodel.AgendamentosActivityViewModel;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -40,18 +37,14 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity implements
-        FilterDialogFragment.FilterListener,
-        RestaurantAdapter.OnRestaurantSelectedListener {
+public class AgendamentosActivity extends AppCompatActivity implements
+        AgendamentosAdapter.OnAgendamentoSelectedListener {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "AgendamentosActivity";
 
     private static final int RC_SIGN_IN = 9001;
 
@@ -60,14 +53,8 @@ public class MainActivity extends AppCompatActivity implements
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
 
-    @BindView(R.id.text_current_search)
-    TextView mCurrentSearchView;
-
-    @BindView(R.id.text_current_sort_by)
-    TextView mCurrentSortByView;
-
-    @BindView(R.id.recycler_restaurants)
-    RecyclerView mRestaurantsRecycler;
+    @BindView(R.id.recycler_agendamentos)
+    RecyclerView mAgendamentosRecycler;
 
     @BindView(R.id.view_empty)
     ViewGroup mEmptyView;
@@ -75,20 +62,34 @@ public class MainActivity extends AppCompatActivity implements
     private FirebaseFirestore mFirestore;
     private Query mQuery;
 
-    private FilterDialogFragment mFilterDialog;
-    private RestaurantAdapter mAdapter;
+    private AgendamentosAdapter mAdapter;
 
-    private MainActivityViewModel mViewModel;
+    private AgendamentosActivityViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_agendamentos);
         ButterKnife.bind(this);
         setSupportActionBar(mToolbar);
 
-        // View model
-        mViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+
+                Intent intent = new Intent(view.getContext(), NovoAgendamentoActivity.class);
+
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
+            }
+        });
+
+        // View model (controle se o usuário está tentando efetuar o login)
+        mViewModel = ViewModelProviders.of(this).get(AgendamentosActivityViewModel.class);
 
         // Enable Firestore logging
         FirebaseFirestore.setLoggingEnabled(true);
@@ -96,21 +97,21 @@ public class MainActivity extends AppCompatActivity implements
         // Firestore
         mFirestore = FirebaseFirestore.getInstance();
 
-        // Get ${LIMIT} restaurants
-        mQuery = mFirestore.collection("restaurants")
-                .orderBy("avgRating", Query.Direction.DESCENDING)
+        // Get ${LIMIT} agendamentos
+        mQuery = mFirestore.collection("agendamentos")
+                .orderBy("hora", Query.Direction.ASCENDING)
                 .limit(LIMIT);
 
         // RecyclerView
-        mAdapter = new RestaurantAdapter(mQuery, this) {
+        mAdapter = new AgendamentosAdapter(mQuery, this) {
             @Override
             protected void onDataChanged() {
                 // Show/hide content if the query returns empty.
                 if (getItemCount() == 0) {
-                    mRestaurantsRecycler.setVisibility(View.GONE);
+                    mAgendamentosRecycler.setVisibility(View.GONE);
                     mEmptyView.setVisibility(View.VISIBLE);
                 } else {
-                    mRestaurantsRecycler.setVisibility(View.VISIBLE);
+                    mAgendamentosRecycler.setVisibility(View.VISIBLE);
                     mEmptyView.setVisibility(View.GONE);
                 }
             }
@@ -123,11 +124,9 @@ public class MainActivity extends AppCompatActivity implements
             }
         };
 
-        mRestaurantsRecycler.setLayoutManager(new LinearLayoutManager(this));
-        mRestaurantsRecycler.setAdapter(mAdapter);
+        mAgendamentosRecycler.setLayoutManager(new LinearLayoutManager(this));
+        mAgendamentosRecycler.setAdapter(mAdapter);
 
-        // Filter Dialog
-        mFilterDialog = new FilterDialogFragment();
     }
 
     @Override
@@ -139,9 +138,6 @@ public class MainActivity extends AppCompatActivity implements
             startSignIn();
             return;
         }
-
-        // Apply filters
-        onFilter(mViewModel.getFilters());
 
         // Start listening for Firestore updates
         if (mAdapter != null) {
@@ -177,6 +173,7 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    // Manages the login intent response
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -198,66 +195,14 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    @OnClick(R.id.filter_bar)
-    public void onFilterClicked() {
-        // Show the dialog containing filter options
-        mFilterDialog.show(getSupportFragmentManager(), FilterDialogFragment.TAG);
-    }
-
-    @OnClick(R.id.button_clear_filter)
-    public void onClearFilterClicked() {
-        mFilterDialog.resetFilters();
-
-        onFilter(Filters.getDefault());
-    }
-
     @Override
-    public void onRestaurantSelected(DocumentSnapshot restaurant) {
-        // Go to the details page for the selected restaurant
-        Intent intent = new Intent(this, RestaurantDetailActivity.class);
-        intent.putExtra(RestaurantDetailActivity.KEY_RESTAURANT_ID, restaurant.getId());
-
-        startActivity(intent);
-        overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
-    }
-
-    @Override
-    public void onFilter(Filters filters) {
-        // Construct query basic query
-        Query query = mFirestore.collection("restaurants");
-
-        // Category (equality filter)
-        if (filters.hasCategory()) {
-            query = query.whereEqualTo(Restaurant.FIELD_CATEGORY, filters.getCategory());
-        }
-
-        // City (equality filter)
-        if (filters.hasCity()) {
-            query = query.whereEqualTo(Restaurant.FIELD_CITY, filters.getCity());
-        }
-
-        // Price (equality filter)
-        if (filters.hasPrice()) {
-            query = query.whereEqualTo(Restaurant.FIELD_PRICE, filters.getPrice());
-        }
-
-        // Sort by (orderBy with direction)
-        if (filters.hasSortBy()) {
-            query = query.orderBy(filters.getSortBy(), filters.getSortDirection());
-        }
-
-        // Limit items
-        query = query.limit(LIMIT);
-
-        // Update the query
-        mAdapter.setQuery(query);
-
-        // Set header
-        mCurrentSearchView.setText(Html.fromHtml(filters.getSearchDescription(this)));
-        mCurrentSortByView.setText(filters.getOrderDescription(this));
-
-        // Save filters
-        mViewModel.setFilters(filters);
+    public void onAgendamentoSelected(DocumentSnapshot agendamento) {
+        // Go to the details page for the selected agendamento
+//        Intent intent = new Intent(this, AgendamentoDetailActivity.class);
+//        intent.putExtra(AgendamentoDetailActivity.KEY_AGENDAMENTO_ID, agendamento.getId());
+//
+//        startActivity(intent);
+//        overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
     }
 
     private boolean shouldStartSignIn() {
@@ -280,23 +225,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void onAddItemsClicked() {
-        // Add a bunch of random restaurants
+        // Add a bunch of random agendamentos
         WriteBatch batch = mFirestore.batch();
         for (int i = 0; i < 10; i++) {
-            DocumentReference restRef = mFirestore.collection("restaurants").document();
+            DocumentReference restRef = mFirestore.collection("agendamentos").document();
 
-            // Create random restaurant / ratings
-            Restaurant randomRestaurant = RestaurantUtil.getRandom(this);
-            List<Rating> randomRatings = RatingUtil.getRandomList(randomRestaurant.getNumRatings());
-            randomRestaurant.setAvgRating(RatingUtil.getAverageRating(randomRatings));
+            // Create random agendamento
+            Agendamento randomAgendamento = AgendamentoUtil.getRandom(this);
 
-            // Add restaurant
-            batch.set(restRef, randomRestaurant);
-
-            // Add ratings to subcollection
-            for (Rating rating : randomRatings) {
-                batch.set(restRef.collection("ratings").document(), rating);
-            }
+            // Add agendamento
+            batch.set(restRef, randomAgendamento);
         }
 
         batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {

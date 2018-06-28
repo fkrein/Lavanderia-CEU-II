@@ -21,8 +21,8 @@ import static android.support.test.espresso.Espresso.openActionBarOverflowOrOpti
 
 @LargeTest @RunWith(AndroidJUnit4.class) public class MainActivityTest {
 
-  @Rule public ActivityTestRule<MainActivity> mActivityTestRule =
-      new ActivityTestRule<>(MainActivity.class, false, false);
+  @Rule public ActivityTestRule<AgendamentosActivity> mActivityTestRule =
+      new ActivityTestRule<>(AgendamentosActivity.class, false, false);
 
   UiDevice device;
   final long TIMEOUT = 300000;  // Five minute timeout because our CI is slooow.

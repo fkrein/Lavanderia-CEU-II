@@ -2,13 +2,13 @@
 
 ## Introduction
 
-Fire Eats is a restaurant recommendation app built on Cloud Firestore.
+Fire Eats is a agendamento recommendation app built on Cloud Firestore.
 For more information about Firestore visit [the docs][firestore-docs].
 
 ## Getting Started
 
   * [Set up your Android app for Cloud Firestore][setup-android]
-    * Use the package name `com.google.firebase.example.fireeats`
+    * Use the package name `com.ceu.lavanderia`
   * In the Authentication tab of the Firebase console go to the 
     [Sign-in Method][auth-providers] page and enable 'Email/Password'.
     * This app uses [FirebaseUI][firebaseui] for authentication.
@@ -22,7 +22,7 @@ Add the following security rules to your project in the:
 ```
 service cloud.firestore {  
   match /databases/{database}/documents {
-    // Anyone can read a restaurant, only authorized
+    // Anyone can read a agendamento, only authorized
     // users can create or update. Deletes are not allowed.
   	 match /restaurants/{restaurantId} {
     	 allow read: if true;
@@ -59,7 +59,7 @@ As you use the app's filter functionality you may see warnings
 in logcat that look like this:
 
 ```
-com.google.firebase.example.fireeats W/Firestore Adapter: onEvent:error
+com.ceu.lavanderia W/Firestore Adapter: onEvent:error
 com.google.firebase.firestore.FirebaseFirestoreException: FAILED_PRECONDITION: The query requires an index. You can create it here: https://console.firebase.google.com/project/...
 ```
 
