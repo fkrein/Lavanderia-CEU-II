@@ -4,15 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ceu.lavanderia.AgendamentosActivity">
+    tools:context="com.ceu.lavanderia.ListagemActivity">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#E0E0E0"
-        tools:context="com.ceu.lavanderia.AgendamentosActivity">
+        tools:context="com.ceu.lavanderia.ListagemActivity">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"

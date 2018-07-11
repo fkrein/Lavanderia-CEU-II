@@ -3,6 +3,7 @@ package com.ceu.lavanderia.adapter;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
+import com.ceu.lavanderia.model.Agendamento;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -11,14 +12,19 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Locale;
 
 /**
- * RecyclerView adapter for displaying the results of a Firestore {@link Query}.
- *
- * Note that this class forgoes some efficiency to gain simplicity. For example, the result of
- * {@link DocumentSnapshot#toObject(Class)} is not cached so the same object may be deserialized
- * many times as the user scrolls.
+ * RecyclerView adapter for displaying the results of a Firestore Query.
  */
 public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<VH>
@@ -58,6 +64,49 @@ public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
                     break;
             }
         }
+
+        // Excluir mSnapshots onde a data e o horário estão no passado
+        Date currentDateTime = Calendar.getInstance().getTime();
+
+        String currentDate = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH).format(currentDateTime);
+        DateFormat formatDate = new SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH);
+
+        String currentTime = new SimpleDateFormat("hh:mm", Locale.ENGLISH).format(currentDateTime);
+        DateFormat formatTime = new SimpleDateFormat("hh:mm", Locale.ENGLISH);
+
+        Date date = null;
+        Date time = null;
+        try {
+            date = formatDate.parse(currentDate);
+            time = formatTime.parse(currentTime);
+        } catch (ParseException e1) {
+            e1.printStackTrace();
+        }
+
+        Iterator<DocumentSnapshot> i = mSnapshots.iterator();
+        while (i.hasNext()) {
+            DocumentSnapshot s = i.next();
+            if (s.toObject(Agendamento.class).DataFormatada().before(date)){
+                i.remove();
+            } else if (s.toObject(Agendamento.class).DataFormatada().equals(date)){
+                if (s.toObject(Agendamento.class).HoraFormatada().before(time)){
+                    i.remove();
+                } else {
+
+                }
+            } else {
+
+            }
+        }
+
+        // Reordenar mSnapshots ArrayList considerando data e hora
+        Collections.sort(mSnapshots, new Comparator<DocumentSnapshot>() {
+            public int compare(DocumentSnapshot o1, DocumentSnapshot o2) {
+                if (o1.toObject(Agendamento.class).DataFormatada() == null || o2.toObject(Agendamento.class).DataFormatada() == null)
+                    return 0;
+                return o1.toObject(Agendamento.class).DataFormatada().compareTo(o2.toObject(Agendamento.class).DataFormatada());
+            }
+        });
 
         onDataChanged();
     }

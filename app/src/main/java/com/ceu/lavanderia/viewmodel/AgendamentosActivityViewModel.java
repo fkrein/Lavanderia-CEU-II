@@ -2,10 +2,10 @@ package com.ceu.lavanderia.viewmodel;
 
 import android.arch.lifecycle.ViewModel;
 
-import com.ceu.lavanderia.AgendamentosActivity;
+import com.ceu.lavanderia.ListagemActivity;
 
 /**
- * ViewModel for {@link AgendamentosActivity}.
+ * ViewModel for {@link ListagemActivity}.
  */
 
 public class AgendamentosActivityViewModel extends ViewModel {

@@ -18,7 +18,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * RecyclerView adapter for a list of Agendamentos.
+ * RecyclerView adapter para uma lista de Agendamentos.
  */
 public class AgendamentosAdapter extends FirestoreAdapter<AgendamentosAdapter.ViewHolder> {
 
@@ -55,10 +55,10 @@ public class AgendamentosAdapter extends FirestoreAdapter<AgendamentosAdapter.Vi
         TextView nameView;
 
         @BindView(R.id.agendamento_item_data)
-        TextView categoryView;
+        TextView dataView;
 
         @BindView(R.id.agendamento_item_hora)
-        TextView cityView;
+        TextView horaView;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -77,8 +77,8 @@ public class AgendamentosAdapter extends FirestoreAdapter<AgendamentosAdapter.Vi
                     .into(imageView);
 
             nameView.setText(agendamento.getName());
-            cityView.setText(agendamento.getHora());
-            categoryView.setText(agendamento.getData());
+            horaView.setText(agendamento.getHora());
+            dataView.setText(agendamento.getData());
 
             // Click listener
             itemView.setOnClickListener(new View.OnClickListener() {

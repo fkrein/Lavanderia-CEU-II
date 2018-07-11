@@ -20,31 +20,29 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ceu.lavanderia.adapter.AgendamentosAdapter;
-import com.ceu.lavanderia.model.Agendamento;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.ceu.lavanderia.util.AgendamentoUtil;
 import com.ceu.lavanderia.viewmodel.AgendamentosActivityViewModel;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Arrays;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class AgendamentosActivity extends AppCompatActivity implements
+public class ListagemActivity extends AppCompatActivity implements
         AgendamentosAdapter.OnAgendamentoSelectedListener {
 
-    private static final String TAG = "AgendamentosActivity";
+    private static final String TAG = "ListagemActivity";
 
     private static final int RC_SIGN_IN = 9001;
 
@@ -61,6 +59,7 @@ public class AgendamentosActivity extends AppCompatActivity implements
 
     private FirebaseFirestore mFirestore;
     private Query mQuery;
+    FirebaseUser user;
 
     private AgendamentosAdapter mAdapter;
 
@@ -69,63 +68,91 @@ public class AgendamentosActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_agendamentos);
+        setContentView(R.layout.activity_listagem);
         ButterKnife.bind(this);
         setSupportActionBar(mToolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-
-                Intent intent = new Intent(view.getContext(), NovoAgendamentoActivity.class);
+                Intent intent = new Intent(view.getContext(), AgendamentoActivity.class);
 
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_from_right, R.anim.slide_out_to_left);
             }
         });
 
-        // View model (controle se o usuário está tentando efetuar o login)
+        // Verifica se o usuário está aguardando resposta do provedor para logar na aplicação
         mViewModel = ViewModelProviders.of(this).get(AgendamentosActivityViewModel.class);
 
         // Enable Firestore logging
         FirebaseFirestore.setLoggingEnabled(true);
-
-        // Firestore
         mFirestore = FirebaseFirestore.getInstance();
 
-        // Get ${LIMIT} agendamentos
-        mQuery = mFirestore.collection("agendamentos")
-                .orderBy("hora", Query.Direction.ASCENDING)
-                .limit(LIMIT);
+        if (!shouldStartSignIn()){
+            buildRecycler();
+        }
 
-        // RecyclerView
-        mAdapter = new AgendamentosAdapter(mQuery, this) {
-            @Override
-            protected void onDataChanged() {
-                // Show/hide content if the query returns empty.
-                if (getItemCount() == 0) {
-                    mAgendamentosRecycler.setVisibility(View.GONE);
-                    mEmptyView.setVisibility(View.VISIBLE);
-                } else {
-                    mAgendamentosRecycler.setVisibility(View.VISIBLE);
-                    mEmptyView.setVisibility(View.GONE);
-                }
-            }
+    }
 
-            @Override
-            protected void onError(FirebaseFirestoreException e) {
-                // Show a snackbar on errors
-                Snackbar.make(findViewById(android.R.id.content),
-                        "Error: check logs for info.", Snackbar.LENGTH_LONG).show();
-            }
-        };
+    public void buildRecycler(){
+        user = FirebaseAuth.getInstance().getCurrentUser();
 
-        mAgendamentosRecycler.setLayoutManager(new LinearLayoutManager(this));
-        mAgendamentosRecycler.setAdapter(mAdapter);
+        mFirestore.collection("admins").whereEqualTo("uid", user.getUid()).limit(1).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if (!task.getResult().isEmpty()) {
+                                // Get ${LIMIT} agendamentos for admin
+                                mQuery = mFirestore.collection("agendamentos")
+                                        .orderBy("hora", Query.Direction.ASCENDING)
+                                        .limit(LIMIT);
+                            } else {
+                                // Get ${LIMIT} agendamentos for regular user
+                                mQuery = mFirestore.collection("agendamentos")
+                                        .whereEqualTo("userID", user.getUid())
+                                        .orderBy("hora", Query.Direction.ASCENDING)
+                                        .limit(LIMIT);
+                            }
+
+                            // RecyclerView
+                            mAdapter = new AgendamentosAdapter(mQuery, ListagemActivity.this) {
+                                @Override
+                                protected void onDataChanged() {
+                                    // Show/hide content if the query returns empty.
+                                    if (getItemCount() == 0) {
+                                        mAgendamentosRecycler.setVisibility(View.GONE);
+                                        mEmptyView.setVisibility(View.VISIBLE);
+                                    } else {
+                                        mAgendamentosRecycler.setVisibility(View.VISIBLE);
+                                        mEmptyView.setVisibility(View.GONE);
+                                    }
+
+                                }
+
+                                @Override
+                                protected void onError(FirebaseFirestoreException e) {
+                                    // Show a snackbar on errors
+                                    Snackbar.make(findViewById(android.R.id.content),
+                                            "Error: check logs for info.", Snackbar.LENGTH_LONG);
+                                }
+                            };
+
+                            mAgendamentosRecycler.setLayoutManager(new LinearLayoutManager(ListagemActivity.this));
+                            mAgendamentosRecycler.setAdapter(mAdapter);
+
+                            // Start listening for Firestore updates
+                            if (mAdapter != null) {
+                                mAdapter.startListening();
+                            }
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
 
     }
 
@@ -143,6 +170,7 @@ public class AgendamentosActivity extends AppCompatActivity implements
         if (mAdapter != null) {
             mAdapter.startListening();
         }
+
     }
 
     @Override
@@ -162,9 +190,6 @@ public class AgendamentosActivity extends AppCompatActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_add_items:
-                onAddItemsClicked();
-                break;
             case R.id.menu_sign_out:
                 AuthUI.getInstance().signOut(this);
                 startSignIn();
@@ -191,13 +216,14 @@ public class AgendamentosActivity extends AppCompatActivity implements
                 } else {
                     showSignInErrorDialog(R.string.message_unknown);
                 }
+            } else {
+                buildRecycler();
             }
         }
     }
 
     @Override
     public void onAgendamentoSelected(DocumentSnapshot agendamento) {
-        // Go to the details page for the selected agendamento
 //        Intent intent = new Intent(this, AgendamentoDetailActivity.class);
 //        intent.putExtra(AgendamentoDetailActivity.KEY_AGENDAMENTO_ID, agendamento.getId());
 //
@@ -222,31 +248,6 @@ public class AgendamentosActivity extends AppCompatActivity implements
 
         startActivityForResult(intent, RC_SIGN_IN);
         mViewModel.setIsSigningIn(true);
-    }
-
-    private void onAddItemsClicked() {
-        // Add a bunch of random agendamentos
-        WriteBatch batch = mFirestore.batch();
-        for (int i = 0; i < 10; i++) {
-            DocumentReference restRef = mFirestore.collection("agendamentos").document();
-
-            // Create random agendamento
-            Agendamento randomAgendamento = AgendamentoUtil.getRandom(this);
-
-            // Add agendamento
-            batch.set(restRef, randomAgendamento);
-        }
-
-        batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Log.d(TAG, "Write batch succeeded.");
-                } else {
-                    Log.w(TAG, "write batch failed.", task.getException());
-                }
-            }
-        });
     }
 
     private void showSignInErrorDialog(@StringRes int message) {
