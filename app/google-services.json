@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "59034573406",
+    "firebase_url": "https://lavanderia-ceu.firebaseio.com",
+    "project_id": "lavanderia-ceu",
+    "storage_bucket": "lavanderia-ceu.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:59034573406:android:ac0d5c71bb8d0859",
+        "android_client_info": {
+          "package_name": "com.ceu.lavanderia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "59034573406-fa5nqm9h1rjjre12ehb3ifaqflemgqho.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ceu.lavanderia",
+            "certificate_hash": "c7e28f6a7c19cc783804271e491750582a10b7a4"
+          }
+        },
+        {
+          "client_id": "59034573406-0ea7vornfsg33g3nech6ojird4i6k6be.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "59034573406-0ea7vornfsg33g3nech6ojird4i6k6be.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdm-4qWENlR3OLmGvOmYR4HEla0eGQ_nc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "59034573406-0ea7vornfsg33g3nech6ojird4i6k6be.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
